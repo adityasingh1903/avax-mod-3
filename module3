@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract TokenizedAsset {
+    string public assetName;
+    string public assetSymbol;
+    uint public totalAssetUnits;
+    address public assetOwner;
+    mapping(address => uint) public assetBalances;
+
+    constructor(string memory givenName, string memory givenSymbol, uint initialAssetUnits) {
+        assetName = givenName;
+        assetSymbol = givenSymbol;
+        totalAssetUnits = initialAssetUnits;
+        assetOwner = msg.sender;
+        assetBalances[msg.sender] = initialAssetUnits;
+    }
+
+    modifier ownerOnly() {
+        require(msg.sender == assetOwner, "Unauthorized: Only asset owner allowed");
+        _;
+    }
+
+    function transferAsset(address recipient, uint units) public {
+require(assetBalances[msg.sender] >= units, "Error        : Insufficient balance");
+        assetBalances[msg.sender] -= units;
+        assetBalances[recipient] += units;
+    }
+
+    function burnAsset(uint units) public {
+        require(assetBalances[msg.sender] >= units, "Error: Insufficient balance");
+        assetBalances[msg.sender] -= units;
+        totalAssetUnits -= units;
+    }
+
+    function mintAsset(address recipient, uint units) public ownerOnly {
+        assetBalances[recipient] += units;
+        totalAssetUnits += units;
+    }
+}
